@@ -146,15 +146,52 @@
         const Save = () => (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>);
 
         const HabitTrackerApp = () => {
-            const [darkMode, setDarkMode] = useState(false);
-            const [tabs, setTabs] = useState([{ id: 1, name: '運動', emoji: '💪', color: 'bg-blue-500', archived: false, checks: {} }]);
-            const [activeTab, setActiveTab] = useState(1);
+            // localStorageからデータを読み込む
+            const loadFromStorage = (key, defaultValue) => {
+                try {
+                    const saved = localStorage.getItem(key);
+                    return saved ? JSON.parse(saved) : defaultValue;
+                } catch (error) {
+                    console.error('データの読み込みエラー:', error);
+                    return defaultValue;
+                }
+            };
+
+            // localStorageにデータを保存する
+            const saveToStorage = (key, value) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                } catch (error) {
+                    console.error('データの保存エラー:', error);
+                }
+            };
+
+            const [darkMode, setDarkMode] = useState(() => loadFromStorage('darkMode', false));
+            const [tabs, setTabs] = useState(() => loadFromStorage('tabs', [{ id: 1, name: '運動', emoji: '💪', color: 'bg-blue-500', archived: false, checks: {} }]));
+            const [activeTab, setActiveTab] = useState(() => loadFromStorage('activeTab', 1));
             const [currentDate, setCurrentDate] = useState(new Date());
             const [showStats, setShowStats] = useState(false);
             const [showAddTab, setShowAddTab] = useState(false);
             const [showNoteModal, setShowNoteModal] = useState(false);
             const [selectedDateNote, setSelectedDateNote] = useState(null);
-            const [locked, setLocked] = useState(false);
+            const [locked, setLocked] = useState(() => loadFromStorage('locked', false));
+
+            // データが変更されたらlocalStorageに保存
+            React.useEffect(() => {
+                saveToStorage('darkMode', darkMode);
+            }, [darkMode]);
+
+            React.useEffect(() => {
+                saveToStorage('tabs', tabs);
+            }, [tabs]);
+
+            React.useEffect(() => {
+                saveToStorage('activeTab', activeTab);
+            }, [activeTab]);
+
+            React.useEffect(() => {
+                saveToStorage('locked', locked);
+            }, [locked]);
 
             const emojis = ['💪', '📚', '🧘', '💊', '💧', '🏃', '🎯', '✍️', '🎵', '🍎', '😴', '🧠', '❤️', '🌟', '✨', '🔥', '⭐', '🎨', '🎮', '☕'];
             const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-yellow-500', 'bg-red-500', 'bg-indigo-500', 'bg-teal-500'];
