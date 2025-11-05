@@ -176,8 +176,6 @@
             const [showNoteModal, setShowNoteModal] = useState(false);
             const [selectedDateNote, setSelectedDateNote] = useState(null);
             const [locked, setLocked] = useState(() => loadFromStorage('locked', false));
-            const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-            const [tabToDelete, setTabToDelete] = useState(null);
 
             // データが変更されたらlocalStorageに保存
             React.useEffect(() => {
@@ -234,29 +232,6 @@
                 setTabs([...tabs, newTab]);
                 setActiveTab(newTab.id);
                 setShowAddTab(false);
-            };
-
-            const deleteTab = (tabId) => {
-                const filteredTabs = tabs.filter(t => t.id !== tabId);
-                setTabs(filteredTabs);
-                
-                // 削除したタブがアクティブだった場合、最初のタブに切り替え
-                if (activeTab === tabId && filteredTabs.length > 0) {
-                    setActiveTab(filteredTabs[0].id);
-                }
-                
-                setShowDeleteConfirm(false);
-                setTabToDelete(null);
-            };
-
-            const confirmDelete = (tabId) => {
-                // 最後のタブは削除できないようにする
-                if (tabs.filter(t => !t.archived).length <= 1) {
-                    alert('最後のタブは削除できません');
-                    return;
-                }
-                setTabToDelete(tabId);
-                setShowDeleteConfirm(true);
             };
 
             const getCurrentTab = () => tabs.find(t => t.id === activeTab);
@@ -332,26 +307,12 @@
                             </div>
                             <div className="flex items-center gap-2 overflow-x-auto pb-2">
                                 {tabs.filter(t => !t.archived).map(tab => (
-                                    <div key={tab.id} className="relative">
-                                        <button onClick={() => setActiveTab(tab.id)}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all
-                                                ${activeTab === tab.id ? `${tab.color} text-white shadow-lg` : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`}>
-                                            <span className="text-lg">{tab.emoji}</span>
-                                            <span className="font-medium">{tab.name}</span>
-                                        </button>
-                                        {tabs.filter(t => !t.archived).length > 1 && (
-                                            <button 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    confirmDelete(tab.id);
-                                                }}
-                                                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-all"
-                                                style={{ padding: '2px' }}
-                                            >
-                                                <X />
-                                            </button>
-                                        )}
-                                    </div>
+                                    <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all
+                                            ${activeTab === tab.id ? `${tab.color} text-white shadow-lg` : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`}>
+                                        <span className="text-lg">{tab.emoji}</span>
+                                        <span className="font-medium">{tab.name}</span>
+                                    </button>
                                 ))}
                                 <button onClick={() => setShowAddTab(true)} className={`p-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`}>
                                     <div className="w-5 h-5"><Plus /></div>
@@ -448,36 +409,6 @@
                                 }} className="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 flex items-center justify-center gap-2">
                                     <div className="w-5 h-5"><Save /></div>保存
                                 </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {showDeleteConfirm && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 max-w-4xl w-full`}>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-bold">タブを削除しますか？</h3>
-                                </div>
-                                <p className={`mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                    このタブとすべてのチェックデータが削除されます。この操作は取り消せません。
-                                </p>
-                                <div className="flex gap-3">
-                                    <button 
-                                        onClick={() => {
-                                            setShowDeleteConfirm(false);
-                                            setTabToDelete(null);
-                                        }}
-                                        className={`flex-1 py-3 rounded-lg font-medium ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`}
-                                    >
-                                        キャンセル
-                                    </button>
-                                    <button 
-                                        onClick={() => deleteTab(tabToDelete)}
-                                        className="flex-1 bg-red-500 text-white py-3 rounded-lg font-medium hover:bg-red-600"
-                                    >
-                                        削除
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     )}
